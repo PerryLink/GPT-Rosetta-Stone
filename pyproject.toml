@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "gpt-rosetta-stone"
+version = "0.1.0"
+description = "统一的大模型 API 参数转换工具,支持 OpenAI、文心、通义等多家提供商"
+authors = ["Chance Dean <novelnexusai@outlook.com>"]
+readme = "README.md"
+packages = [{include = "gpt_rosetta_stone", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pydantic = "^2.0"
+rich = "^13.0"
+click = "^8.1"
+pyyaml = "^6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+black = "^24.0"
+ruff = "^0.3"
+
+[tool.poetry.scripts]
+gpt-rosetta-stone = "gpt_rosetta_stone.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
