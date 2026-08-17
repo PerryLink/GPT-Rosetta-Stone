@@ -2,7 +2,7 @@
 
 # GPT-Rosetta-Stone
 
-**统一的大模型 API 参数转换工具，将 OpenAI 格式请求转换为文心（Ernie）和通义（Qwen）格式。**
+**统一的大模型 API 参数转换工具，支持 OpenAI、文心（Ernie）、通义（Qwen）等多家提供商。**
 
 *已移植至 [dsh-translate](https://github.com/PerryLink/dsh-translate) —— 属于 PerryLink DSH 插件家族。*
 
@@ -20,28 +20,39 @@ GPT-Rosetta-Stone 将 OpenAI 格式的对话请求参数转换为其他 LLM 提�
 
 ## 核心特性
 
-- **统一接口** —— 通过一次 `convert_request` 调用即可在不同提供商之间转换
-- **类型安全** —— 基于 Pydantic v2 的请求模型校验输入
+- **统一接口** —— 通过单一接口在不同 LLM 提供商 API 之间转换
+- **类型安全** —— 基于 Pydantic v2 构建，稳健的数据校验
+- **易于扩展** —— 仅需 3 步即可添加新提供商
 - **智能转换** —— 自动映射参数并调整取值范围
 - **友好处理** —— 对不支持的参数给出友好警告
-- **易于扩展** —— 三步即可添加新提供商（适配器 + 映射 + 工厂注册）
+- **CLI 支持** —— 带 Rich 输出的命令行界面
 
 ## 快速开始
 
 ```bash
+# 使用 pip
 pip install gpt-rosetta-stone
+
+# 使用 Poetry
+poetry add gpt-rosetta-stone
 ```
+
+### 基本使用
 
 ```python
 from gpt_rosetta_stone import RosettaStone
 
+# 创建文心（百度）模型转换器
 converter = RosettaStone(target_provider="ernie")
+
+# 转换 OpenAI 格式请求
 result = converter.convert_request({
     "model": "gpt-4",
     "messages": [{"role": "user", "content": "你好"}],
     "temperature": 0.7,
     "max_tokens": 100,
 })
+
 print(result)
 # {'model': 'gpt-4', 'messages': [...], 'temperature': 0.7, 'max_output_tokens': 100}
 ```
@@ -78,15 +89,63 @@ print(result)
 ### 命令行
 
 ```bash
-# 从文件读取
+# 从文件转换
 gpt-rosetta-stone convert --target ernie --input request.json
 
-# 直接传入 JSON
+# 转换内联 JSON
 gpt-rosetta-stone convert --target ernie --data '{"model":"gpt-4","messages":[{"role":"user","content":"test"}]}'
 
 # 查看某提供商的参数映射
 gpt-rosetta-stone show-mapping --provider ernie
 ```
+
+### API 参考
+
+**`RosettaStone`** —— 主转换类。
+
+```python
+converter = RosettaStone(target_provider="ernie")
+result = converter.convert_request(request_data)
+```
+
+- `target_provider` (str)：目标提供商名称（`"openai"`、`"ernie"`、`"qwen"`）
+- `convert_request(request_data: Dict) -> Dict`：转换请求参数
+
+**`StandardRequest`** —— 标准请求模型（兼容 OpenAI 格式）。
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `model` | str | 模型名称 |
+| `messages` | List[Message] | 消息列表 |
+| `temperature` | float，可选 | 采样温度，默认 `0.7` |
+| `top_p` | float，可选 | 核采样概率，默认 `1.0` |
+| `max_tokens` | int，可选 | 最大输出 token 数 |
+| `stream` | bool，可选 | 流式输出，默认 `False` |
+| `presence_penalty` | float，可选 | 存在惩罚，默认 `0` |
+| `frequency_penalty` | float，可选 | 频率惩罚，默认 `0` |
+| `n` | int，可选 | 结果数量，默认 `1` |
+| `stop` | List[str]，可选 | 停止序列 |
+
+## 扩展
+
+添加新的模型提供商只需 3 步：
+
+1. 创建适配器 —— `src/gpt_rosetta_stone/adapters/newprovider.py`
+2. 创建映射 —— `src/gpt_rosetta_stone/mappings/newprovider_mappings.py`
+3. 注册到工厂 —— 在 `AdapterFactory.ADAPTERS` 中添加条目
+
+## 技术栈
+
+| 组件 | 库 |
+|------|----|
+| 编程语言 | Python 3.8+ |
+| 数据校验 | Pydantic 2.0+ |
+| CLI 框架 | Click 8.1+ |
+| 终端格式化 | Rich 13.0+ |
+| 配置文件 | PyYAML 6.0+ |
+| 测试框架 | Pytest 8.0+ |
+| 代码格式化 | Black 24.0+ |
+| 代码检查 | Ruff 0.3+ |
 
 ## 开发
 
@@ -96,6 +155,15 @@ poetry run pytest tests/ -v
 poetry run black src/ tests/
 poetry run ruff check src/ tests/
 ```
+
+## 相关项目
+
+- [dsh-translate](https://github.com/PerryLink/dsh-translate) —— 本项目被移植进的 DSH 插件
+- [PerryLink](https://github.com/PerryLink) —— PerryLink DSH 插件家族
+
+## 贡献
+
+欢迎贡献！请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
 
 ## 许可证
 
