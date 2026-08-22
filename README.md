@@ -1,6 +1,7 @@
 <div align="center">
 
 # GPT-Rosetta-Stone
+[![Gitee](https://img.shields.io/badge/Gitee-mirror-c71d23?logo=gitee)](https://gitee.com/perrylink/gpt-rosetta-stone)
 
 **A unified API parameter conversion tool for large language models, supporting OpenAI, Ernie (文心), Qwen (通义) and more.**
 
